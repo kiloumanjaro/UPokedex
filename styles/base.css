@@ -19,13 +19,19 @@
   --home-footer-height: 0px;
 }
 
+html {
+  height: 100%;
+  overflow-y: hidden;
+}
+
 body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg);
   background-image: radial-gradient(#e5e0d8 1px, transparent 1px);
   background-size: 24px 24px;
   color: var(--text);
-  min-height: 100vh;
+  min-height: 100%;
+  overflow-y: auto;
 }
 
 .container {

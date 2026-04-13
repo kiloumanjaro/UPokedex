@@ -1,6 +1,7 @@
 // App-wide configuration: API endpoints, image URL builder, and pagination batch size
 export const API_BASE  = 'https://pokeapi.co/api/v2';
 export const BATCH_SIZE = 10;
+export const MAX_POKEDEX_ID = 1010;
 
 export function imageUrl(id) {
   const n = parseInt(id, 10);

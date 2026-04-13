@@ -22,6 +22,7 @@ import { capitalize } from "../../utils/capitalize.js";
 let gridEl, countEl, loadMoreWrap, loadMoreBtn;
 let onCardClick = null;
 let footerResizeObserver = null;
+let loadAllPromise = null;
 
 export function setupHome(cardClickCallback) {
   onCardClick = cardClickCallback;
@@ -55,11 +56,21 @@ export function setupHome(cardClickCallback) {
   loadMoreBtn.addEventListener("click", loadMore);
 
   // Search
-  document.getElementById("searchInput").addEventListener("input", function () {
-    setSearchQuery(this.value.trim());
-    renderGrid();
-    syncLoadMoreVisibility();
-  });
+  document
+    .getElementById("searchInput")
+    .addEventListener("input", function () {
+      setSearchQuery(this.value.trim());
+      if (getSearchQuery()) {
+        ensureAllPokemonLoaded().then(() => {
+          if (getSearchQuery()) {
+            renderGrid();
+            syncLoadMoreVisibility();
+          }
+        });
+      }
+      renderGrid();
+      syncLoadMoreVisibility();
+    });
 
   // Sort
   const sortIdBtn = document.getElementById("sortId");
@@ -81,10 +92,15 @@ export function setupHome(cardClickCallback) {
   });
 
   // Type filter
-  typeFilterSelect.addEventListener("change", async () => {
+  typeFilterSelect.addEventListener("change", () => {
     setTypeFilter(typeFilterSelect.value);
     if (getTypeFilter()) {
-      await primeTypeData(cache.list);
+      ensureAllPokemonLoaded().then(async () => {
+        if (!getTypeFilter()) return;
+        await primeTypeData(cache.list);
+        renderGrid();
+        syncLoadMoreVisibility();
+      });
     }
     renderGrid();
     syncLoadMoreVisibility();
@@ -147,15 +163,23 @@ function renderGrid() {
   const query = getSearchQuery();
   const typeFilter = getTypeFilter();
   const total = pagination.getTotalCount();
+  const isLoadingAll = !!loadAllPromise && !pagination.getAllLoaded();
 
   if (query || typeFilter) {
     const typeSuffix = typeFilter ? ` in ${capitalize(typeFilter)}` : "";
-    countEl.textContent = `${list.length} result${list.length !== 1 ? "s" : ""} found${typeSuffix}`;
+    const loadingSuffix = isLoadingAll ? " (loading full Pokedex...)" : "";
+    countEl.textContent = `${list.length} result${list.length !== 1 ? "s" : ""} found${typeSuffix}${loadingSuffix}`;
   } else {
     countEl.textContent = `Showing ${cache.list.length}${total ? " of " + total : ""} Pok\u00e9mon`;
   }
 
   if (list.length === 0) {
+    if ((query || typeFilter) && isLoadingAll) {
+      gridEl.innerHTML = `<div class="empty-state">
+        <p>Loading full Pokedex\u2026</p>
+      </div>`;
+      return;
+    }
     const emptyLabel = query
       ? `\u201c<strong>${escapeHtml(query)}</strong>\u201d`
       : typeFilter
@@ -189,7 +213,9 @@ function showGridError(msg) {
 
 function syncLoadMoreVisibility() {
   loadMoreWrap.style.display =
-    getSearchQuery() || pagination.getAllLoaded() ? "none" : "flex";
+    getSearchQuery() || getTypeFilter() || pagination.getAllLoaded()
+      ? "none"
+      : "flex";
   syncFooterHeight();
 }
 
@@ -222,11 +248,46 @@ function syncFooterHeight() {
 async function primeTypeData(list) {
   const missing = list.filter((p) => !cache.pokemon[p.id]);
   if (missing.length === 0) return;
-  await Promise.all(
-    missing.map((p) =>
-      getPokemon(p.id).catch(() => {
-        /* ignore */
-      }),
-    ),
-  );
+  for (let i = 0; i < missing.length; i += 20) {
+    const slice = missing.slice(i, i + 20);
+    await Promise.all(
+      slice.map((p) =>
+        getPokemon(p.id).catch(() => {
+          /* ignore */
+        }),
+      ),
+    );
+  }
+}
+
+async function ensureAllPokemonLoaded() {
+  if (pagination.getAllLoaded()) return Promise.resolve();
+  if (loadAllPromise) return loadAllPromise;
+
+  loadAllPromise = (async () => {
+    let safety = 0;
+    while (pagination.getIsLoading() && safety < 80) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      safety += 1;
+    }
+
+    pagination.setLoading(true);
+    try {
+      while (!pagination.getAllLoaded()) {
+        const { items, hasMore } = await fetchPokemonBatch(
+          pagination.getOffset(),
+        );
+        cache.list.push(...items);
+        pagination.advanceOffset();
+        if (!hasMore) pagination.markAllLoaded();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      pagination.setLoading(false);
+      loadAllPromise = null;
+    }
+  })();
+
+  return loadAllPromise;
 }

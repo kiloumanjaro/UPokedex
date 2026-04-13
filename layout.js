@@ -22,10 +22,8 @@ export function render() {
             <input id="searchInput" type="search" placeholder="Search name or #ID\u2026" autocomplete="off" />
           </div>
           <div class="sort-wrap">
-            <span class="sort-label">Sort:</span>
             <button class="sort-btn active" id="sortId">By ID</button>
             <button class="sort-btn" id="sortName">A \u2013 Z</button>
-            <span class="sort-label">Type:</span>
             <select id="typeFilter" class="type-filter">
               <option value="">All Types</option>
               ${typeOptions}
