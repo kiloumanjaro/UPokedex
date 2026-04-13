@@ -2,8 +2,8 @@
 export function render() {
   document.body.innerHTML = `
     <header>
-      <div class="pokeball"></div>
-      <h1>Pokédex</h1>
+      <img class="header-logo" src="./assets/pokeball.svg" alt="" aria-hidden="true" />
+      <h1>UPokedex</h1>
     </header>
 
     <main class="container">

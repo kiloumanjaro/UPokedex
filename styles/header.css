@@ -1,47 +1,33 @@
-/* Sticky header bar and pokeball icon */
+/* Sticky header bar */
 header {
-  background: var(--red);
-  color: #fff;
+  background: #fff;
+  color: var(--text);
   padding: 0 24px;
   height: 64px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   position: sticky;
   top: 0;
   z-index: 200;
-  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  border-bottom: 2px solid var(--border);
+  box-shadow: none;
 }
 
 header h1 {
+  font-family: 'Outfit', sans-serif;
   font-size: 1.55rem;
   font-weight: 900;
-  letter-spacing: -.4px;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--text);
 }
 
-.pokeball {
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  border: 3px solid rgba(255,255,255,.85);
-  position: relative;
+.header-logo {
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
-}
-.pokeball::before {
-  content: '';
-  position: absolute;
-  top: 50%; left: -3px; right: -3px;
-  height: 3px;
-  background: rgba(255,255,255,.85);
-  transform: translateY(-50%);
-}
-.pokeball::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  width: 9px; height: 9px;
-  background: rgba(255,255,255,.9);
-  border-radius: 50%;
-  transform: translate(-50%,-50%);
+  object-fit: contain;
 }
 
 @media (max-width: 540px) {

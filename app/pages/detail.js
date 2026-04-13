@@ -6,30 +6,49 @@ import {
 import { getPokemon, getSpecies, calcWeaknesses } from '../../lib/services/pokemonService.js';
 import { getTotalCount } from '../../hooks/usePagination.js';
 
+let activeDetailRequest = 0;
+
+export async function fetchDetailState(id) {
+  const [pokemon, species] = await Promise.all([
+    getPokemon(id),
+    getSpecies(id).catch(() => null),
+  ]);
+
+  const types = pokemon.types.map(t => t.type.name);
+  const weaknesses = await calcWeaknesses(types);
+
+  return {
+    id,
+    totalCount: getTotalCount(),
+    pokemon,
+    species,
+    weaknesses,
+  };
+}
+
 export async function loadDetail(id, contentEl, handlers = {}) {
-  contentEl.innerHTML = '<div class="modal-loading"><div class="spinner-lg"></div></div>';
+  const requestId = ++activeDetailRequest;
+  const hasNotebook = !!contentEl.querySelector('[data-book-root]');
+
+  contentEl.dataset.detailLoading = 'true';
+
+  if (!hasNotebook) {
+    contentEl.innerHTML = '<div class="modal-loading"><div class="spinner-lg"></div></div>';
+  }
 
   try {
-    const [poke, species] = await Promise.all([
-      getPokemon(id),
-      getSpecies(id).catch(() => null)
-    ]);
-
-    const types = poke.types.map(t => t.type.name);
-    const weaknesses = await calcWeaknesses(types);
-    const totalCount = getTotalCount();
-    contentEl.innerHTML = renderPokemonNotebook({
-      id,
-      totalCount,
-      pokemon: poke,
-      species,
-      weaknesses,
-    });
+    const detailState = await fetchDetailState(id);
+    if (requestId !== activeDetailRequest) return;
+    contentEl.innerHTML = renderPokemonNotebook(detailState);
 
     hydratePokemonNotebook(contentEl, handlers);
+    contentEl.dataset.detailLoading = 'false';
 
   } catch (e) {
+    if (requestId !== activeDetailRequest) return;
+
     console.error(e);
+    contentEl.dataset.detailLoading = 'false';
     contentEl.innerHTML = `
       <div class="modal-loading">
         <p style="color:#dc2626;font-weight:700;margin-bottom:14px">Failed to load #${id}</p>
