@@ -27,6 +27,7 @@ let gridEl, countEl, loadMoreWrap, loadMoreBtn;
 let onCardClick = null;
 let footerResizeObserver = null;
 let loadAllPromise = null;
+let lastLoadMode = "batch";
 
 export function setupHome(cardClickCallback) {
   onCardClick = cardClickCallback;
@@ -57,7 +58,7 @@ export function setupHome(cardClickCallback) {
       return;
     }
     if (e.target.closest('[data-action="retry-load"]')) {
-      loadMore();
+      retryLoad();
     }
   };
 
@@ -120,7 +121,7 @@ export function setupHome(cardClickCallback) {
 
   gridEl.addEventListener("click", handleGridClick);
   gridEl.addEventListener("keydown", handleGridKeydown);
-  loadMoreBtn.addEventListener("click", loadMore);
+  loadMoreBtn.addEventListener("click", loadAll);
   document
     .querySelector(".search-input")
     .addEventListener("input", handleSearchInput);
@@ -145,6 +146,7 @@ export async function init() {
 
 export async function loadMore() {
   if (pagination.getIsLoading() || pagination.getAllLoaded()) return;
+  lastLoadMode = "batch";
   pagination.setLoading(true);
   loadMoreBtn.disabled = true;
   loadMoreBtn.innerHTML = '<span class="spinner-sm"></span> Loading\u2026';
@@ -159,6 +161,30 @@ export async function loadMore() {
     );
   } finally {
     pagination.setLoading(false);
+    loadMoreBtn.disabled = false;
+    loadMoreBtn.textContent = "Load More Pokemons";
+    syncLoadMoreVisibility();
+  }
+}
+
+export async function loadAll() {
+  if (pagination.getIsLoading() || pagination.getAllLoaded()) return;
+  lastLoadMode = "all";
+  loadMoreBtn.disabled = true;
+  loadMoreBtn.innerHTML = '<span class="spinner-sm"></span> Loading\u2026';
+
+  try {
+    await ensureAllPokemonLoaded();
+    if (getTypeFilter()) {
+      await primeTypeData(cache.list);
+    }
+    renderGrid();
+  } catch (e) {
+    console.error(e);
+    showGridError(
+      "Failed to load Pok\u00e9mon. Check your connection and try again.",
+    );
+  } finally {
     loadMoreBtn.disabled = false;
     loadMoreBtn.textContent = "Load More Pokemons";
     syncLoadMoreVisibility();
@@ -219,6 +245,14 @@ function showGridError(msg) {
         Retry
       </button>
     </div>`;
+}
+
+function retryLoad() {
+  if (lastLoadMode === "all") {
+    loadAll();
+    return;
+  }
+  loadMore();
 }
 
 function syncLoadMoreVisibility() {
