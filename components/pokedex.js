@@ -333,16 +333,16 @@ export function renderPokedex(
           <div data-book-spread class="pokedex-spread" style="gap:${PAGE_GAP}px">
             <section data-book-page="left" class="pokedex-page pokedex-page--left">
               <div class="pokedex-page-inner">
-                <header class="pokedex-hero">
-                  <div class="pokedex-title">
-                    <span class="pokedex-eyebrow">Pokedex Entry</span>
-                    <h2 class="pokedex-name">${escapeHtml(capitalize(pokemon.name))}</h2>
-                  </div>
-                  <div class="pokedex-id-card">
-                    <span class="pokedex-id-label">Pokedex ID</span>
-                    <span class="pokedex-id-value">${escapeHtml(formatId(id))}</span>
-                  </div>
-                </header>
+              <div class="pokedex-hero">
+                <div class="pokedex-title">
+                  <span class="pokedex-eyebrow">Pokedex Entry</span>
+                  <h2 class="pokedex-name">${escapeHtml(capitalize(pokemon.name))}</h2>
+                </div>
+                <div class="pokedex-id-card">
+                  <span class="pokedex-id-label">Pokedex ID</span>
+                  <span class="pokedex-id-value">${escapeHtml(formatId(id))}</span>
+                </div>
+              </div>
 
                 <div class="pokedex-hero-grid">
                   <div class="pokedex-image-panel">
