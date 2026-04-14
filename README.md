@@ -28,8 +28,8 @@ hooks/           → State containers for pagination and search/sort
 components/      → Reusable UI pieces (card renderer, modal shell)
 app/pages/       → Page-level views (home grid, detail modal content)
 styles/          → CSS split by scope (base, header, controls, card, modal, types)
-layout.js        → Renders the persistent HTML shell (header, containers, modal overlay)
-router.js        → Wires views together: card click → modal, keyboard nav, close
+app/layout.js    → Renders the persistent HTML shell (header, containers, modal overlay)
+app/router.js    → Wires views together: card click → modal, keyboard nav, close
 main.js          → Entry point: renders layout, initializes router
 index.html       → Loads CSS and main.js as a module
 ```

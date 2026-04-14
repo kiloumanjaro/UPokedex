@@ -1,6 +1,6 @@
 // Renders the persistent UI shell: header, main container with controls, and modal overlay
-import { TYPE_LIST } from "./constants/types.js";
-import { capitalize } from "./utils/capitalize.js";
+import { TYPE_LIST } from "../constants/types.js";
+import { capitalize } from "../utils/capitalize.js";
 export function render() {
   const typeOptions = TYPE_LIST.map(
     (type) => `<option value="${type}">${capitalize(type)}</option>`,

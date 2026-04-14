@@ -1,8 +1,8 @@
 // Handles view switching between home (card list) and detail (modal) views
-import { initModal, open as openModal, close as closeModal, scrollToTop } from './components/modal.js';
-import { setupHome, init as initHome } from './app/pages/home.js';
-import { fetchDetailState, loadDetail } from './app/pages/detail.js';
-import { getTotalCount } from './hooks/use-pagination.js';
+import { initModal, open as openModal, close as closeModal, scrollToTop } from '../components/modal.js';
+import { setupHome, init as initHome } from './pages/home.js';
+import { fetchDetailState, loadDetail } from './pages/detail.js';
+import { getTotalCount } from '../hooks/use-pagination.js';
 
 let currentId = null;
 let contentEl = null;
