@@ -17,37 +17,37 @@ export function init() {
     retry:    retryDetail
   });
 
-  document.addEventListener('keydown', e => {
-    if (!currentId) return;
-    if (e.key === 'Escape') {
-      requestHideDetail();
-      return;
-    }
-
-    if (contentEl?.dataset.detailLoading === 'true') return;
-
-    if (e.key === 'ArrowLeft') {
-      const previousButton = contentEl?.querySelector('[data-book-action="previous"]');
-      if (previousButton && !previousButton.disabled) {
-        previousButton.click();
-        return;
-      }
-
-      navigateDetail(getPreviousDetailId(currentId));
-    }
-
-    if (e.key === 'ArrowRight') {
-      const nextButton = contentEl?.querySelector('[data-book-action="next"]');
-      if (nextButton && !nextButton.disabled) {
-        nextButton.click();
-        return;
-      }
-
-      navigateDetail(getNextDetailId(currentId));
-    }
-  });
+  document.addEventListener('keydown', handleKeydown);
 
   initHome();
+}
+
+function handleKeydown(e) {
+  if (!currentId) return;
+  if (e.key === 'Escape') {
+    requestHideDetail();
+    return;
+  }
+
+  if (contentEl?.dataset.detailLoading === 'true') return;
+
+  if (e.key === 'ArrowLeft') {
+    const previousButton = contentEl?.querySelector('[data-book-action="previous"]');
+    if (previousButton && !previousButton.disabled) {
+      previousButton.click();
+      return;
+    }
+    navigateDetail(getPreviousDetailId(currentId));
+  }
+
+  if (e.key === 'ArrowRight') {
+    const nextButton = contentEl?.querySelector('[data-book-action="next"]');
+    if (nextButton && !nextButton.disabled) {
+      nextButton.click();
+      return;
+    }
+    navigateDetail(getNextDetailId(currentId));
+  }
 }
 
 function showDetail(id) {

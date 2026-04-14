@@ -13,16 +13,16 @@ export function cardHTML({ id, name }, idx) {
   return `
     <div class="poke-card" data-id="${id}"
          style="--card-delay:${delay}ms" tabindex="0">
-      <div class="evolution-badge" id="evo-${id}"></div>
+      <div class="evolution-badge"></div>
       <div class="card-img-wrap">
-        <div class="card-img-bg" id="cbg-${id}"></div>
+        <div class="card-img-bg"></div>
         <img src="${imageUrl(id)}" alt="${escapeHtml(name)}" width="110" height="110"
              loading="lazy" />
       </div>
       <div class="card-body">
         <div class="card-num">${formatId(id)}</div>
         <div class="card-name">${capitalize(name)}</div>
-        <div class="type-pills" id="tp-${id}">
+        <div class="type-pills">
           <span class="type-pill type-pill--loading">···</span>
         </div>
       </div>
@@ -32,19 +32,21 @@ export function cardHTML({ id, name }, idx) {
 export function injectTypes(id) {
   const poke = cache.pokemon[id];
   if (!poke) return;
-  const el = document.getElementById(`tp-${id}`);
+  const card = document.querySelector(`.poke-card[data-id="${id}"]`);
+  if (!card) return;
+  const el = card.querySelector('.type-pills');
   if (!el) return;
   const types = poke.types.map(t => t.type.name);
   el.innerHTML = types.map(t =>
     `<span class="type-pill t-${t}">${capitalize(t)}</span>`
   ).join('');
-  const bg = document.getElementById(`cbg-${id}`);
+  const bg = card.querySelector('.card-img-bg');
   if (bg) bg.style.setProperty('--card-bg-color', TYPE_BG[types[0]] ?? '#aaa');
   injectEvolutionStage(id);
 }
 
 async function injectEvolutionStage(id) {
-  const badge = document.getElementById(`evo-${id}`);
+  const badge = document.querySelector(`.poke-card[data-id="${id}"] .evolution-badge`);
   if (!badge) return;
 
   const stage = await getEvolutionStage(id);

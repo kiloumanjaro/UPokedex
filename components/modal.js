@@ -6,11 +6,11 @@ export function initModal(handlers) {
   modalEl    = document.querySelector('.modal');
   contentEl  = document.querySelector('.modal__content');
 
-  overlayEl.addEventListener('click', e => {
+  const handleOverlayClick = (e) => {
     if (e.target === overlayEl) handlers.close();
-  });
+  };
 
-  modalEl.addEventListener('click', e => {
+  const handleModalClick = (e) => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
     const action = btn.dataset.action;
@@ -21,7 +21,10 @@ export function initModal(handlers) {
       case 'prev': case 'next': handlers.navigate(id); break;
       case 'retry':           handlers.retry(id);     break;
     }
-  });
+  };
+
+  overlayEl.addEventListener('click', handleOverlayClick);
+  modalEl.addEventListener('click', handleModalClick);
 
   return contentEl;
 }

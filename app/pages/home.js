@@ -33,8 +33,20 @@ export function setupHome(cardClickCallback) {
 
   setupFooterLayout();
 
-  // Event delegation on card grid
-  gridEl.addEventListener("click", (e) => {
+  const sortIdBtn = document.querySelector('[data-sort="id"]');
+  const sortNameBtn = document.querySelector('[data-sort="name"]');
+  const typeFilterSelect = document.querySelector(".type-filter");
+  const typeFilterWrap = document.querySelector(".type-filter-wrap");
+
+  let isTypeMenuOpen = false;
+  const setTypeMenuOpen = (next) => {
+    isTypeMenuOpen = next;
+    if (typeFilterWrap) {
+      typeFilterWrap.classList.toggle("type-filter-wrap--open", isTypeMenuOpen);
+    }
+  };
+
+  const handleGridClick = (e) => {
     const card = e.target.closest(".poke-card");
     if (card) {
       onCardClick(parseInt(card.dataset.id, 10));
@@ -43,69 +55,48 @@ export function setupHome(cardClickCallback) {
     if (e.target.closest('[data-action="retry-load"]')) {
       loadMore();
     }
-  });
+  };
 
-  gridEl.addEventListener("keydown", (e) => {
+  const handleGridKeydown = (e) => {
     if (e.key === "Enter") {
       const card = e.target.closest(".poke-card");
       if (card) onCardClick(parseInt(card.dataset.id, 10));
     }
-  });
+  };
 
-  // Load More Pokemons
-  loadMoreBtn.addEventListener("click", loadMore);
+  const handleSearchInput = (e) => {
+    setSearchQuery(e.target.value.trim());
+    if (getSearchQuery()) {
+      ensureAllPokemonLoaded().then(() => {
+        if (getSearchQuery()) {
+          renderGrid();
+          syncLoadMoreVisibility();
+        }
+      });
+    }
+    renderGrid();
+    syncLoadMoreVisibility();
+  };
 
-  // Search
-  document
-    .querySelector(".search-input")
-    .addEventListener("input", function () {
-      setSearchQuery(this.value.trim());
-      if (getSearchQuery()) {
-        ensureAllPokemonLoaded().then(() => {
-          if (getSearchQuery()) {
-            renderGrid();
-            syncLoadMoreVisibility();
-          }
-        });
-      }
-      renderGrid();
-      syncLoadMoreVisibility();
-    });
-
-  // Sort
-  const sortIdBtn = document.querySelector('[data-sort="id"]');
-  const sortNameBtn = document.querySelector('[data-sort="name"]');
-  const typeFilterSelect = document.querySelector(".type-filter");
-  const typeFilterWrap = document.querySelector(".type-filter-wrap");
-
-  sortIdBtn.addEventListener("click", () => {
+  const handleSortByIdClick = () => {
     setSortMode("id");
     sortIdBtn.classList.add("sort-btn--active");
     sortNameBtn.classList.remove("sort-btn--active");
     renderGrid();
-  });
+  };
 
-  sortNameBtn.addEventListener("click", () => {
+  const handleSortByNameClick = () => {
     setSortMode("name");
     sortNameBtn.classList.add("sort-btn--active");
     sortIdBtn.classList.remove("sort-btn--active");
     renderGrid();
-  });
-
-  // Type filter
-  let typeMenuOpen = false;
-  const setTypeMenuOpen = (next) => {
-    typeMenuOpen = next;
-    if (typeFilterWrap) {
-      typeFilterWrap.classList.toggle("type-filter-wrap--open", typeMenuOpen);
-    }
   };
 
-  typeFilterSelect.addEventListener("click", () => {
-    setTypeMenuOpen(!typeMenuOpen);
-  });
+  const handleTypeFilterClick = () => {
+    setTypeMenuOpen(!isTypeMenuOpen);
+  };
 
-  typeFilterSelect.addEventListener("change", () => {
+  const handleTypeFilterChange = () => {
     setTypeMenuOpen(false);
     setTypeFilter(typeFilterSelect.value);
     if (getTypeFilter()) {
@@ -118,16 +109,25 @@ export function setupHome(cardClickCallback) {
     }
     renderGrid();
     syncLoadMoreVisibility();
-  });
+  };
 
-  typeFilterSelect.addEventListener("blur", () => {
-    setTypeMenuOpen(false);
-  });
+  const handleTypeFilterBlur = () => setTypeMenuOpen(false);
 
-  document.addEventListener("click", (e) => {
+  const handleDocumentClick = (e) => {
     if (!typeFilterWrap || typeFilterWrap.contains(e.target)) return;
     setTypeMenuOpen(false);
-  });
+  };
+
+  gridEl.addEventListener("click", handleGridClick);
+  gridEl.addEventListener("keydown", handleGridKeydown);
+  loadMoreBtn.addEventListener("click", loadMore);
+  document.querySelector(".search-input").addEventListener("input", handleSearchInput);
+  sortIdBtn.addEventListener("click", handleSortByIdClick);
+  sortNameBtn.addEventListener("click", handleSortByNameClick);
+  typeFilterSelect.addEventListener("click", handleTypeFilterClick);
+  typeFilterSelect.addEventListener("change", handleTypeFilterChange);
+  typeFilterSelect.addEventListener("blur", handleTypeFilterBlur);
+  document.addEventListener("click", handleDocumentClick);
 }
 
 export async function init() {
