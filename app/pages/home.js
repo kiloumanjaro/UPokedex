@@ -82,19 +82,15 @@ export function setupHome(cardClickCallback) {
     syncLoadMoreVisibility();
   };
 
-  const handleSortByIdClick = () => {
-    setSortMode("id");
-    sortIdBtn.classList.add("sort-btn--active");
-    sortNameBtn.classList.remove("sort-btn--active");
+  const handleSortClick = (mode, activeBtn, inactiveBtn) => {
+    setSortMode(mode);
+    activeBtn.classList.add("sort-btn--active");
+    inactiveBtn.classList.remove("sort-btn--active");
     renderGrid();
   };
 
-  const handleSortByNameClick = () => {
-    setSortMode("name");
-    sortNameBtn.classList.add("sort-btn--active");
-    sortIdBtn.classList.remove("sort-btn--active");
-    renderGrid();
-  };
+  const handleSortByIdClick = () => handleSortClick("id", sortIdBtn, sortNameBtn);
+  const handleSortByNameClick = () => handleSortClick("name", sortNameBtn, sortIdBtn);
 
   const handleTypeFilterClick = () => {
     setTypeMenuOpen(!isTypeMenuOpen);

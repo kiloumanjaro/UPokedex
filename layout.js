@@ -15,10 +15,7 @@ export function render() {
     <main class="container">
       <div class="home-content">
         <div class="controls">
-          <div class="search-wrap">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
+          <div class="search-wrap">s
             <input class="search-input" type="search" placeholder="Search name or #ID\u2026" autocomplete="off" />
           </div>
           <div class="sort-wrap">
