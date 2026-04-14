@@ -136,12 +136,14 @@ export function setupHome(cardClickCallback) {
 export async function init() {
   showSkeletons(gridEl);
   try {
-    const count = await fetchTotalCount();
-    pagination.setTotalCount(count);
+    const countPromise = fetchTotalCount()
+      .then((count) => pagination.setTotalCount(count))
+      .catch(() => {});
+    const loadPromise = loadMore();
+    await Promise.allSettled([countPromise, loadPromise]);
   } catch {
     /* continue */
   }
-  await loadMore();
 }
 
 export async function loadMore() {
@@ -152,7 +154,15 @@ export async function loadMore() {
   loadMoreBtn.innerHTML = '<span class="spinner-sm"></span> Loading\u2026';
 
   try {
-    await ensureAllPokemonLoaded();
+    const { items, hasMore } = await fetchPokemonBatch(pagination.getOffset());
+    cache.list.push(...items);
+    pagination.advanceOffset();
+    if (!hasMore) pagination.markAllLoaded();
+
+    if (getTypeFilter()) {
+      await primeTypeData(items);
+    }
+
     renderGrid();
   } catch (e) {
     console.error(e);
