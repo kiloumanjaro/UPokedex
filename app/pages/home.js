@@ -150,26 +150,8 @@ export async function loadMore() {
   loadMoreBtn.innerHTML = '<span class="spinner-sm"></span> Loading\u2026';
 
   try {
-    const { items, hasMore } = await fetchPokemonBatch(pagination.getOffset());
-    cache.list.push(...items);
-    pagination.advanceOffset();
-    if (!hasMore) pagination.markAllLoaded();
-
-    if (getTypeFilter()) {
-      await primeTypeData(items);
-    }
-
+    await ensureAllPokemonLoaded();
     renderGrid();
-
-    items.forEach((p) => {
-      if (!cache.pokemon[p.id]) {
-        getPokemon(p.id)
-          .then(() => injectTypes(p.id))
-          .catch(() => {});
-      } else {
-        injectTypes(p.id);
-      }
-    });
   } catch (e) {
     console.error(e);
     showGridError(
